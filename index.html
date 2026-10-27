@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f6f0">
+  <meta name="description" content="自己设置信号，看看现场发生的变化何时会被 PLC 确认、程序何时能看到。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="信号变了，程序看见了吗？｜PLC 入门小实验">
+  <meta property="og:description" content="先预测再揭晓：轻点与按住、同样长的信号换个时机、按下时短暂抖动。最后自己调参数看四条时间线。">
+  <meta property="og:locale" content="zh_CN">
+  <meta name="twitter:card" content="summary">
+  <title>信号变了，程序看见了吗？｜PLC 入门小实验</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css?v=9">
+  <noscript><style>.guided{display:none}#terms[hidden],#advanced[hidden]{display:block!important}</style></noscript>
+</head>
+<body>
+  <div class="shell">
+    <noscript><p class="noscript-note">本页的交互实验需要 JavaScript，下面的文字说明不需要：<a href="#terms">先确认，再让程序读取</a>。</p></noscript>
+    <header class="masthead">
+      <a class="brand" href="#top"><span class="brandmark">PLC</span>应用技术 · 学习资源</a>
+      <span class="mast-meta">PLC 入门 / 信号与程序</span>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">一个小实验 · 看懂 PLC 怎么接收信号</p>
+          <h1>信号变了，程序<br><em>看见了吗？</em></h1>
+          <p>先按一按、挪一挪，再看看程序究竟记住了什么。</p>
+        </div>
+        <div class="hero-mark" aria-hidden="true"><span>0</span><i></i><span>1</span><b>?</b></div>
+      </section>
+
+      <section class="story" aria-label="先看懂发生了什么">
+        <div class="story-lead"><span>先记一句话</span><strong>现场发生过，程序不一定看见。</strong></div>
+        <div class="story-flow">
+          <div><span>①</span><strong>现场变了</strong><p>按钮或传感器发出信号</p></div>
+          <div><span>②</span><strong>PLC 先确认</strong><p>太短的变化可能被忽略</p></div>
+          <div><span>③</span><strong>程序再读取</strong><p>只记住查看那一刻的结果</p></div>
+        </div>
+      </section>
+
+      <section class="guided" aria-labelledby="guided-title">
+        <div class="guided-head">
+          <div><p class="eyebrow">先完成三次小实验</p><h2 id="guided-title">从一次按下开始</h2></div>
+          <span class="signal-key">按钮松开 = 0　按钮按下 = 1</span>
+        </div>
+        <div class="guide-tabs" role="group" aria-label="实验步骤">
+          <button type="button" data-guide-step="0" class="active" aria-current="step">1　轻点和按住</button>
+          <button type="button" data-guide-step="1" disabled>2　换个时机</button>
+          <button type="button" data-guide-step="2" disabled>3　按下时抖动</button>
+        </div>
+        <div class="guide-panel">
+          <p id="guide-kicker" class="eyebrow">第 1 次 · 先看确认过程</p>
+          <h3 id="guide-title" tabindex="-1">轻点一下，和按住一会儿，会一样吗？</h3>
+          <p id="guide-description">先试“轻点”，再试“按住”。这一步只看现场和 PLC 的确认进度。</p>
+          <div id="guide-concept" class="guide-concept">
+            <strong>为什么 PLC 要“等一等”再确认？</strong>
+            <p>按钮和传感器在接通的一瞬间，接点会弹跳几下；导线长了，还会拾取电磁干扰。所以 PLC 常常看到一串很短、很碎的 0/1 跳变，它们并不代表有人真的按了按钮。</p>
+            <p>一看到 1 就采信的话，程序会把一次按下记成好几次，或者把干扰当成真动作。数字输入里的<b>滤波</b>干的就是这件事：信号要稳定保持 1 达到设定时间 <b>T</b>，PLC 才承认输入真的变成 1；同样要稳定保持 0 达到 T，才承认变回 0；短于 T 的跳变直接被忽略。</p>
+            <small>下面这条“确认进度”就是它的画法：按下时往上走，松开时往回退，走到顶才算确认。图中 T = 6 毫秒；这条进度只是帮助理解的画法。</small>
+          </div>
+          <div id="guide-controls" class="guide-controls"></div>
+          <div class="guide-predict"><strong id="guide-question">先猜一猜</strong><div id="guide-answers" class="guide-answers" role="group" aria-label="预测答案"></div></div>
+          <p id="guide-hint" class="guide-hint" role="status"></p>
+          <button id="guide-run" class="guide-run" type="button">揭晓结果 <span aria-hidden="true">→</span></button>
+          <div class="guide-chart-scroll"><div id="guide-chart" class="guide-chart" role="img" aria-label="小实验示意图"></div></div>
+          <p class="guide-mobile-hint">左右滑动看完整图。</p>
+          <div id="guide-result" class="guide-result" aria-live="polite">选一种按法，猜完再揭晓。</div>
+          <div class="guide-nav"><span id="guide-progress">试过轻点 0/1 · 试过按住 0/1</span><button id="guide-next" type="button" disabled>下一次实验 →</button></div>
+        </div>
+      </section>
+
+      <section class="lab" aria-labelledby="lab-title" hidden>
+        <div class="lab-heading">
+          <div><p class="eyebrow">04 / 自由实验</p><h2 id="lab-title">给 PLC 两段变化</h2></div>
+          <p>先来一小段干扰，再来一段真正的动作。</p>
+        </div>
+
+        <div class="presets" role="group" aria-label="示例参数">
+          <span>选一个小故事</span>
+          <button type="button" data-preset="clear" class="active" aria-pressed="true">短干扰，真动作</button>
+          <button type="button" data-preset="near" aria-pressed="false">只差一点点</button>
+          <button type="button" data-preset="shift" aria-pressed="false">挪一下查看时刻</button>
+          <button type="button" data-preset="long" aria-pressed="false">干扰也很久</button>
+          <button type="button" data-preset="bounce" aria-pressed="false">按一下却会抖</button>
+        </div>
+
+        <form id="experiment-form" novalidate>
+          <div class="parameter-grid">
+            <label class="parameter" for="first-width"><span id="first-label">干扰持续多久</span><span class="input-line"><input id="first-width" name="first-width" type="number" min="0.5" max="40" step="0.5" value="3" inputmode="decimal"><em>ms</em></span></label>
+            <label class="parameter" for="second-width"><span id="second-label">真正动作持续多久</span><span class="input-line"><input id="second-width" name="second-width" type="number" min="0.5" max="40" step="0.5" value="14" inputmode="decimal"><em>ms</em></span></label>
+            <label class="parameter bounce-only" for="bounce-gap" hidden><span>中间断开多久</span><span class="input-line"><input id="bounce-gap" name="bounce-gap" type="number" min="0.5" max="10" step="0.5" value="1" inputmode="decimal"><em>ms</em></span></label>
+            <label class="parameter" for="filter-time"><span>PLC 等多久才确认</span><span class="input-line"><input id="filter-time" name="filter-time" type="number" min="0" max="20" step="0.5" value="6" inputmode="decimal"><em>ms</em></span></label>
+            <label class="parameter" for="scan-time"><span>程序隔多久看一次</span><span class="input-line"><input id="scan-time" name="scan-time" type="number" min="2" max="30" step="1" value="10" inputmode="numeric"><em>ms</em></span></label>
+            <label class="parameter" for="scan-phase"><span>第一次查看的时刻</span><span class="input-line"><input id="scan-phase" name="scan-phase" type="number" min="0" max="30" step="0.5" value="0" inputmode="decimal"><em>ms</em></span></label>
+          </div>
+          <div class="form-action"><p id="form-note">ms 是毫秒，1 ms = 千分之一秒。“PLC 等多久才确认”就是手册里的输入滤波时间（填 0 只用于模拟，实机不能设 0）；调小试试干扰会不会混进来，调大试试快速动作会不会被漏掉。“第一次查看的时刻”取 0 到“隔多久看一次”之间。</p><button id="run-button" type="submit">看看会发生什么 <span aria-hidden="true">→</span></button></div>
+          <p id="form-error" class="form-error" role="alert" hidden></p>
+        </form>
+
+        <div class="diagram-heading"><div><p class="eyebrow">05 / 看完整变化</p><h2>现场信号怎样走进程序？</h2></div><span id="run-status">等待运行</span></div>
+        <p class="diagram-guide">从上往下看四行：<b>现场 → 确认进度 → 已确认 → 程序记住的值</b></p>
+        <div class="diagram-scroll"><div id="stage" class="stage" role="img" aria-label="等待运行实验"></div></div>
+        <p class="mobile-hint">左右滑动查看完整波形；横屏更清楚。</p>
+        <div id="outcome" class="outcome" aria-live="polite"><span class="outcome-icon">?</span><p>先猜一猜：第一段短变化，程序会看见吗？</p></div>
+      </section>
+
+      <section id="terms" class="logic" aria-labelledby="logic-title" hidden>
+        <div><p class="eyebrow">03 / 把过程连起来</p><h2 id="logic-title">先确认，再让程序读取</h2></div>
+        <div class="logic-steps">
+          <div><span>第一关 · 输入滤波</span><strong>先等变化站稳</strong><p>信号是 1，确认进度上升；变回 0，进度下降。走满才确认 1，退到底才确认 0。</p></div>
+          <div><span>第二关 · 扫描读取</span><strong>每轮再看一眼</strong><p>程序每轮取一次已确认状态，读到的 0 或 1 叫输入 I；直到下次读取前都保持这个值。</p></div>
+          <div><span>怎么选 · 确认时间 T</span><strong>两头都要留余量</strong><p>T 要大于最长的抖动和干扰，小于最短的有效信号：T 太小毛刺会混进来，T 太大快速动作会被漏掉。实机在 TIA Portal 的“设备组态 → CPU（或信号模块）→ 数字量输入 → 输入滤波”里设，S7-1200 集成 DI 的档位从 0.1 µs 起、最大 20 ms。</p></div>
+        </div>
+        <div class="bounce-note"><span>读图小提示</span><strong>最下面一行为什么有时更长？</strong><p>因为程序会一直保留上次看到的值，直到下一条“查看”竖线。接点抖动则是一次按下时短暂出现 <b>1 → 0 → 1</b>。</p></div>
+      </section>
+
+      <section id="advanced" class="questions" aria-label="进阶思考" hidden>
+        <article><span>进阶试试 · 干扰也很久</span><h2>等得再久，也不一定辨得出真假。</h2><p>干扰持续得足够久，也会被确认。PLC 只看到信号的变化，看不到它的“意图”。</p></article>
+        <article><span>进阶试试 · 只差一点点</span><h2>两段时间很接近时，结果不稳。</h2><p>现实中的持续时间会波动，不能把确认时间卡得太紧。</p></article>
+      </section>
+    </main>
+
+    <footer class="foot"><span>《PLC 应用技术》· 信号怎样进入程序</span><span>S7-1200 常规输入示意 · 数字仅作教学模拟</span></footer>
+  </div>
+  <script src="./app.js?v=9" defer></script>
+</body>
+</html>
