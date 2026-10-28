@@ -1,30 +1,19 @@
-# PLC 数字输入滤波 · 交互微仿真
+# PLCS7-1200 数字输入采样机制
 
-一个纯静态的教学网页：用四条时间线（现场信号 → 确认进度 → PLC 确认的信号 → 程序记住的值）演示 S7-1200 数字量输入的**输入滤波**与**扫描读取**，让初学者亲手验证「现场发生过，程序不一定看见」。
+一个纯静态的教学微仿真。输入脉冲宽度、到来时刻、滤波时间和扫描周期，点击“发出一个波”，对照四行信号：现场输入、滤波后、普通采样 I、脉冲捕捉 I。页面适配电脑、竖屏手机和横屏手机。
 
-## 页面内容
+## 预览
 
-- 三步引导，每步只变一个量：轻点与按住、同样长的信号换个时机、按下时短暂抖动
-- 自由实验：6 个参数 + 5 个情景预设，可以对照「已确认窗口的宽度」和「查看间隔」看出结果从哪来
-- 无构建、无外部依赖、无统计脚本；字体随仓库发布，OFL 授权见 `fonts/OFL.txt`
+直接打开 `index.html`，或在仓库目录运行 `python -m http.server 8765` 后访问 `http://127.0.0.1:8765/`。
 
-## 部署：Cloudflare Pages
+## Cloudflare Pages
 
-在 Cloudflare Pages 里连接本仓库，然后按下表填：
+连接此仓库，生产分支选 `main`；Framework preset 选 `None`；Build command 填 `exit 0`；Build output directory 填 `/`，Root directory 保持默认。仓库根目录就是站点根目录。推送到 `main` 后自动重新部署。
 
-| 设置项 | 值 |
-| --- | --- |
-| Framework preset | None |
-| Build command | 留空（或 `exit 0`） |
-| Build output directory | `/` |
-| 生产分支 | `main` |
+## 教学模型边界
 
-仓库根目录就是站点根目录。以后改完推送 `main`，Cloudflare 会自动重新部署。
+页面一次只模拟一个初始为 0 的数字量高脉冲。滤波累计按西门子手册规则演示；扫描周期固定，仅用于观察读取时机。滤波时间 0 只用于教学，实际设备需选支持的档位。脉冲捕捉发生在滤波之后，无法找回已被滤掉的脉冲。页面数值不用于现场设备选型或参数设定。
 
-## 修改约定
+资料：[西门子数字输入滤波](https://docs.tia.siemens.cloud/r/simatic_s7_1200_manual_collection_enus_20/device-configuration/configuring-the-operation-of-the-cpu/configuring-digital-input-filter-times) · [西门子脉冲捕捉](https://docs.tia.siemens.cloud/r/simatic_s7_1200_manual_collection_enus_20/device-configuration/configuring-the-operation-of-the-cpu/pulse-catch?contentId=4ilY9cFiW_IEbv7OrAb9tg)
 
-改过 `style.css` 或 `app.js` 之后，把 `index.html` 里的 `?v=` 数字同时加一，否则浏览器可能继续用旧缓存。
-
-## 教学模型的边界
-
-页面里的数值只用于说明机制：滤波按西门子手册的受限增减规则计算，扫描从「第一次查看的时刻」开始按固定间隔取值。真实设备的扫描时间会波动；模型不包含输入电气特性、现场干扰波形、硬件中断与脉冲捕获。靠近阈值的信号必须实测并留余量。
+字体授权见 `fonts/OFL.txt`。
